@@ -30,3 +30,9 @@
 *.exe
 *.out
 *.app
+
+# CAD
+*.stl
+
+# VSCode
+.vscode/c_cpp_properties.json
