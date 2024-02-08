@@ -80,7 +80,7 @@ def main() -> int:
     )
 
     # Make a serial connection
-    serial_connection = serial.Serial(args.serial, 9600, timeout=1)
+    serial_connection = serial.Serial(args.serial, 115200, timeout=1)
 
     # Create the light obj
     shelf_light = Light(

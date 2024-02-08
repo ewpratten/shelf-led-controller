@@ -30,7 +30,8 @@ long button_state_changed_at = 0;
 
 void setup() {
   // Start a serial connection
-  Serial.begin(9600);
+  Serial.setTimeout(2);
+  Serial.begin(115200);
 
   // Set up the LED strip
   pixels.begin();
@@ -104,16 +105,19 @@ void loop() {
     String incoming_color = Serial.readString();
     uint32_t color = (uint32_t)strtol(incoming_color.c_str(), NULL, 10);
 
-    // Set the lights to whatever that color is
-    for (int i=0; i<pixels.numPixels(); i++) {
-      pixels.setPixelColor(i, color);
-    }
-    pixels.show();
-
     // Send the appropriate signal
     if (color == 0) {
+      pixels.clear();
+      pixels.show();
       Serial.println("OFF");
     } else {
+      // Set the lights to whatever that color is
+      for (int i=0; i<pixels.numPixels(); i++) {
+        pixels.setPixelColor(i, color);
+      }
+      pixels.show();
+
+      Serial.println(color);
       Serial.println("ON");
       Serial.println(color);
     }
