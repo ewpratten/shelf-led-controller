@@ -114,7 +114,7 @@ def main() -> int:
             r = (color & 0b00110000) >> 4
             g = (color & 0b00001100) >> 2
             b = (color & 0b00000011)
-            logger.info(f"Color: {r}, {g}, {b}, {w}")
+            logger.info(f"Color: {hex(r)}, {hex(g)}, {hex(b)}, {hex(w)}")
             shelf_light.color("rgbw", {"r": r, "g": g, "b": b, "w": w})
         
         
