@@ -91,6 +91,8 @@ def main() -> int:
     while True:         
         # Read a line
         line = serial_connection.readline()
+        if not line:
+            continue
         
         # Handle the command
         if line.strip() == "OFF":
