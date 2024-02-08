@@ -108,7 +108,7 @@ def main() -> int:
             g = (color & 0b00001100) >> 2
             b = (color & 0b00000011)
             logger.info(f"Color: {r}, {g}, {b}, {w}")
-            shelf_light.set_color("rgbw", {"r": r, "g": g, "b": b, "w": w})
+            shelf_light.color("rgbw", {"r": r, "g": g, "b": b, "w": w})
         
         
 
