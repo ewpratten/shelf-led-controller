@@ -47,7 +47,7 @@ def light_data_callback(client: Client, userdata: Light, message: MQTTMessage, s
 def main() -> int:
     # Handle program arguments
     ap = argparse.ArgumentParser()
-    ap.add_argument("--serial", help="Serial port", default="/dev/ttyUSB0")
+    ap.add_argument("--serial", help="Serial port", default="/dev/ttyACM0")
     ap.add_argument("--host", help="MQTT broker host", default="controller.home")
     ap.add_argument("--port", help="MQTT broker port", type=int, default=1883)
     ap.add_argument("--username", help="MQTT broker username")
