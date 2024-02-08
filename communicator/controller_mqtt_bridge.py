@@ -25,17 +25,14 @@ def light_data_callback(
         logger.error(f"[HA->Light]: Failed to decode message: {e}")
         return
 
-    # If the payload is trying to set the light state, handle it
-    if "state" in data:
-        if data["state"] == "ON":
-            logger.info("[HA->Light]: Turning on the light (using last color)")
-            serial_connection.write(f"ON\n".encode())
-        else:
-            logger.info("[HA->Light]: Turning off the light")
-            serial_connection.write(b"OFF\n")
+    # Handle "OFF" request
+    if "state" in data and data["state"] == "OFF":
+        logger.info("[HA->Light]: Turning off the light")
+        serial_connection.write(b"OFF\n")
+        return
 
     # If we have a color payload, handle it
-    if "color" in data:
+    if ("state" in data and data["state"] == "ON") and "color" in data:
         logger.info(f"[HA->Light]: Setting color to {data['color']}")
         r = data["color"]["r"]
         g = data["color"]["g"]

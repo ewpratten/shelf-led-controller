@@ -51,65 +51,25 @@ void setup()
   // button_state_changed_at = millis();
 }
 
-void update_lights(){
-  if (leds_enabled)
-  {
-    // Write to all lights
-    for (int i = 0; i < pixels.numPixels(); i++)
-    {
-      pixels.setPixelColor(i, current_color);
-    }
-    pixels.show();
-  }
-  else
-  {
-    pixels.clear();
-    pixels.show();
-  }
-
-  // Send back a message describing the state
-  if (leds_enabled)
-  {
-    if (current_color == 0)
-    {
-      current_color = pixels.Color(255, 255, 255);
-    }
-    Serial.println(current_color);
-    Serial.println("ON");
-  }
-  else
-  {
-    Serial.println("OFF");
-  }
-}
-
-void loop (){
+void loop()
+{
   // Read the serial input
   if (Serial.available() > 0)
   {
     // Read the command
     String command = Serial.readString();
 
-    // If the command is "ON", turn the lights on
-    if (command == "ON\n")
+    // Skip blank commands
+    if (command.length() == 0 || command == "\n")
     {
-      // Set the global state
-      leds_enabled = true;
-      
-      // Update the lights
-      update_lights();
       return;
     }
-
     // If the command is "OFF", turn the lights off
-    else if (command == "OFF\n")
+    if (command == "OFF\n")
     {
-      // Set the global state
-      leds_enabled = false;
-
-      // Update the lights
-      update_lights();
-      return;
+      pixels.clear();
+      pixels.show();
+      Serial.println("OFF");
     }
 
     // Otherwise, the command is a color
@@ -118,8 +78,16 @@ void loop (){
       // Convert the command to a color
       current_color = (uint32_t)strtol(command.c_str(), NULL, 10);
 
-      // Update the lights
-      update_lights();
+      // Write to all lights
+      for (int i = 0; i < pixels.numPixels(); i++)
+      {
+        pixels.setPixelColor(i, current_color);
+      }
+      pixels.show();
+
+      // Send back a message describing the state
+      Serial.println(current_color);
+      Serial.println("ON");
     }
   }
 }
