@@ -83,27 +83,41 @@ void loop() {
       }
       pixels.show();
 
+      // Send a "on" signal
+      Serial.println("ON");
+
+      // Send the color as a string
+      Serial.println(current_color);
+
     } else {
       pixels.clear();
       pixels.show();
 
-      // Send a 0x00 back to indicate the lights are off
-      Serial.write((uint8_t) 0x00);
+      // Send an "off" signal
+      Serial.println("OFF");
     }
   }
 
   // Check if we got a serial byte
   if (Serial.available() > 0) {
-    int incoming_byte = Serial.read();
+    // Read a color command as a decimal string and decode it
+    String incoming_color = Serial.readString();
+    uint32_t color = (uint32_t)strtol(incoming_color.c_str(), NULL, 16);
 
-    // Set the lights to whatever that byte is
+    // Set the lights to whatever that color is
     for (int i=0; i<pixels.numPixels(); i++) {
-      pixels.setPixelColor(i, incoming_byte);
+      pixels.setPixelColor(i, color);
     }
     pixels.show();
 
-    // Echo the byte back
-    Serial.write(incoming_byte);
+    // Send the appropriate signal
+    if (color == 0) {
+      Serial.println("OFF");
+    } else {
+      Serial.println("ON");
+      Serial.println(color);
+    }
+
   }
   
 }
