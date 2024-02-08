@@ -44,10 +44,9 @@ def light_data_callback(
         r = data["color"]["r"]
         g = data["color"]["g"]
         b = data["color"]["b"]
-        w = data["color"]["w"]
 
         # Pack into a uint32
-        color = (w << 24) | (r << 16) | (g << 8) | b
+        color = (r << 16) | (g << 8) | b
         logger.info(f"[HA->Light]: Packed color: {hex(color)}")
 
         # Send the color to the light
@@ -91,7 +90,7 @@ def main() -> int:
             entity=LightInfo(
                 name="Evan's Shelf Light",
                 color_mode=True,
-                supported_color_modes=["rgbw"],
+                supported_color_modes=["rgb"],
             ),
         ),
         lambda c, u, m: light_data_callback(c, u, m, serial_connection),
@@ -122,7 +121,7 @@ def main() -> int:
             g = (color >> 8) & 0xff
             b = color & 0xff
             logger.info(f"[Light->HA]: Color: {hex(r)}, {hex(g)}, {hex(b)}, {hex(w)}")
-            shelf_light.color("rgbw", {"r": r, "g": g, "b": b, "w": w})
+            shelf_light.color("rgb", {"r": r, "g": g, "b": b})
 
     return 0
 

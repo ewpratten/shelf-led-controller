@@ -102,7 +102,7 @@ void loop() {
   if (Serial.available() > 0) {
     // Read a color command as a decimal string and decode it
     String incoming_color = Serial.readString();
-    uint32_t color = (uint32_t)strtol(incoming_color.c_str(), NULL, 16);
+    uint32_t color = (uint32_t)strtol(incoming_color.c_str(), NULL, 10);
 
     // Set the lights to whatever that color is
     for (int i=0; i<pixels.numPixels(); i++) {
