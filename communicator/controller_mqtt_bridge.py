@@ -13,6 +13,8 @@ logger = logging.getLogger(__name__)
 LAST_KNOWN_COLOR = 0
 
 def light_data_callback(client: Client, userdata: Light, message: MQTTMessage, serial_connection: serial.Serial):
+    global LAST_KNOWN_COLOR
+    
     # Parse the incoming message
     try: 
         data = json.loads(message.payload.decode())
@@ -45,7 +47,6 @@ def light_data_callback(client: Client, userdata: Light, message: MQTTMessage, s
         serial_connection.write(f"{color}\n".encode())
         
         # track the last known color
-        global LAST_KNOWN_COLOR
         LAST_KNOWN_COLOR = color
 
 
