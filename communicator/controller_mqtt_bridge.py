@@ -117,10 +117,10 @@ def main() -> int:
         else:
             color = int(line.strip())
             logger.info(f"[Light->HA]: Got raw color from light: {hex(color)}")
-            w = (color >> 24) & 0b00000011
-            r = (color >> 16) & 0b00000011
-            g = (color >> 8) & 0b00000011
-            b = color & 0b00000011
+            w = (color >> 24) & 0xff
+            r = (color >> 16) & 0xff
+            g = (color >> 8) & 0xff
+            b = color & 0xff
             logger.info(f"[Light->HA]: Color: {hex(r)}, {hex(g)}, {hex(b)}, {hex(w)}")
             shelf_light.color("rgbw", {"r": r, "g": g, "b": b, "w": w})
 
