@@ -42,6 +42,10 @@ def main() -> int:
     # Make a serial connection
     serial_connection = serial.Serial(args.serial, 115200, timeout=1)
     
+    # Track the last known color so we can restore it when the light is turned on
+    last_known_color = 0xffffff
+    
+    # Make the callback FN
     def light_data_callback(
         client: Client,
         userdata: Light,
@@ -60,7 +64,7 @@ def main() -> int:
         if "state" in data:
             if data["state"] == "ON":
                 logger.info("[HA->Light]: Turning on the light (using last color)")
-                # serial_connection.write(f"{LAST_KNOWN_COLOR}\n".encode())
+                serial_connection.write(f"{last_known_color}\n".encode())
                 shelf_light.on()
             else:
                 logger.info("[HA->Light]: Turning off the light")
@@ -79,6 +83,7 @@ def main() -> int:
 
             # Send the color to the light
             serial_connection.write(f"{color}\n".encode())
+            last_known_color = color
 
     # Create the light obj
     shelf_light = Light(
