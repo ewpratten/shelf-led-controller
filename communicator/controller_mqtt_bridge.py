@@ -10,7 +10,7 @@ from paho.mqtt.client import Client, MQTTMessage
 
 logger = logging.getLogger(__name__)
 
-LAST_KNOWN_COLOR = 0
+LAST_KNOWN_COLOR = 0x00ffffff
 
 
 def light_data_callback(
