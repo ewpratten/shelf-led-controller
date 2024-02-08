@@ -95,10 +95,10 @@ def main() -> int:
             continue
         
         # Handle the command
-        if line.strip() == "OFF":
+        if line.strip() == b"OFF":
             logger.info("Light is off")
             shelf_light.off()
-        elif line.strip() == "ON":
+        elif line.strip() == b"ON":
             logger.info("Light is on")
             shelf_light.on()
         else:
