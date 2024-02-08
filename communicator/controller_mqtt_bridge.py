@@ -12,16 +12,22 @@ logger = logging.getLogger(__name__)
 
 LAST_KNOWN_COLOR = 0
 
-def light_data_callback(client: Client, userdata: Light, message: MQTTMessage, serial_connection: serial.Serial):
+
+def light_data_callback(
+    client: Client,
+    userdata: Light,
+    message: MQTTMessage,
+    serial_connection: serial.Serial,
+):
     global LAST_KNOWN_COLOR
-    
+
     # Parse the incoming message
-    try: 
+    try:
         data = json.loads(message.payload.decode())
     except json.JSONDecodeError as e:
         logger.error(f"Failed to decode message: {e}")
         return
-    
+
     # If the payload is trying to set the light state, handle it
     if "state" in data:
         if data["state"] == "ON":
@@ -29,8 +35,8 @@ def light_data_callback(client: Client, userdata: Light, message: MQTTMessage, s
             serial_connection.write(f"{LAST_KNOWN_COLOR}\n".encode())
         else:
             logger.info("Turning off the light")
-            serial_connection.write(b"0\n")       
-            
+            serial_connection.write(b"0\n")
+
     # If we have a color payload, handle it
     if "color" in data:
         logger.info(f"Setting color to {data['color']}")
@@ -38,14 +44,14 @@ def light_data_callback(client: Client, userdata: Light, message: MQTTMessage, s
         g = data["color"]["g"]
         b = data["color"]["b"]
         w = data["color"]["w"]
-        
+
         # Pack into a uint32
         color = (w << 24) | (r << 16) | (g << 8) | b
         logger.info(f"Packed color: {color}")
-        
+
         # Send the color to the light
         serial_connection.write(f"{color}\n".encode())
-        
+
         # track the last known color
         LAST_KNOWN_COLOR = color
 
@@ -73,7 +79,7 @@ def main() -> int:
     mqtt = Settings.MQTT(
         host=args.host, port=args.port, username=args.username, password=args.password
     )
-    
+
     # Make a serial connection
     serial_connection = serial.Serial(args.serial, 9600, timeout=1)
 
@@ -92,14 +98,14 @@ def main() -> int:
 
     # Set the initial state of the light
     shelf_light.off()
-    
+
     # Run forever
-    while True:         
+    while True:
         # Read a line
         line = serial_connection.readline()
         if not line:
             continue
-        
+
         # Handle the command
         if line.strip() == b"OFF":
             logger.info("Light is off")
@@ -110,14 +116,12 @@ def main() -> int:
         else:
             color = int(line.strip())
             logger.info(f"Got raw color from light: {hex(color)}")
-            w = (color & 0b11000000) >> 6
-            r = (color & 0b00110000) >> 4
-            g = (color & 0b00001100) >> 2
-            b = (color & 0b00000011)
+            w = (color >> 24) & 0b00000011
+            r = (color >> 16) & 0b00000011
+            g = (color >> 8) & 0b00000011
+            b = color & 0b00000011
             logger.info(f"Color: {hex(r)}, {hex(g)}, {hex(b)}, {hex(w)}")
             shelf_light.color("rgbw", {"r": r, "g": g, "b": b, "w": w})
-        
-        
 
     return 0
 
