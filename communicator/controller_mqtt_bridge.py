@@ -109,7 +109,7 @@ def main() -> int:
             shelf_light.on()
         else:
             color = int(line.strip())
-            logger.info(f"Got raw color from light: {color}")
+            logger.info(f"Got raw color from light: {hex(color)}")
             w = (color & 0b11000000) >> 6
             r = (color & 0b00110000) >> 4
             g = (color & 0b00001100) >> 2
