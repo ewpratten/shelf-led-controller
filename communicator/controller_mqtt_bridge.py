@@ -11,8 +11,42 @@ from paho.mqtt.client import Client, MQTTMessage
 logger = logging.getLogger(__name__)
 
 
+def light_data_callback(
+    client: Client,
+    userdata: Light,
+    message: MQTTMessage,
+    serial_connection: serial.Serial,
+):
 
+    # Parse the incoming message
+    try:
+        data = json.loads(message.payload.decode())
+    except json.JSONDecodeError as e:
+        logger.error(f"[HA->Light]: Failed to decode message: {e}")
+        return
 
+    # If the payload is trying to set the light state, handle it
+    if "state" in data:
+        if data["state"] == "ON":
+            logger.info("[HA->Light]: Turning on the light (using last color)")
+            serial_connection.write(f"ON\n".encode())
+        else:
+            logger.info("[HA->Light]: Turning off the light")
+            serial_connection.write(b"OFF\n")
+
+    # If we have a color payload, handle it
+    if "color" in data:
+        logger.info(f"[HA->Light]: Setting color to {data['color']}")
+        r = data["color"]["r"]
+        g = data["color"]["g"]
+        b = data["color"]["b"]
+
+        # Pack into a uint32
+        color = (r << 16) | (g << 8) | b
+        logger.info(f"[HA->Light]: Packed color: {hex(color)}")
+
+        # Send the color to the light
+        serial_connection.write(f"{color}\n".encode())
 
 
 def main() -> int:
@@ -41,49 +75,6 @@ def main() -> int:
 
     # Make a serial connection
     serial_connection = serial.Serial(args.serial, 115200, timeout=1)
-    
-    # Track the last known color so we can restore it when the light is turned on
-    last_known_color = 0xffffff
-    
-    # Make the callback FN
-    def light_data_callback(
-        client: Client,
-        userdata: Light,
-        message: MQTTMessage,
-        serial_connection: serial.Serial,
-    ):
-
-        # Parse the incoming message
-        try:
-            data = json.loads(message.payload.decode())
-        except json.JSONDecodeError as e:
-            logger.error(f"[HA->Light]: Failed to decode message: {e}")
-            return
-
-        # If the payload is trying to set the light state, handle it
-        if "state" in data:
-            if data["state"] == "ON":
-                logger.info("[HA->Light]: Turning on the light (using last color)")
-                serial_connection.write(f"{last_known_color}\n".encode())
-                shelf_light.on()
-            else:
-                logger.info("[HA->Light]: Turning off the light")
-                serial_connection.write(b"0\n")
-
-        # If we have a color payload, handle it
-        if "color" in data:
-            logger.info(f"[HA->Light]: Setting color to {data['color']}")
-            r = data["color"]["r"]
-            g = data["color"]["g"]
-            b = data["color"]["b"]
-
-            # Pack into a uint32
-            color = (r << 16) | (g << 8) | b
-            logger.info(f"[HA->Light]: Packed color: {hex(color)}")
-
-            # Send the color to the light
-            serial_connection.write(f"{color}\n".encode())
-            last_known_color = color
 
     # Create the light obj
     shelf_light = Light(
