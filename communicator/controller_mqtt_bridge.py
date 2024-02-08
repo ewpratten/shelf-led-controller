@@ -11,12 +11,16 @@ from paho.mqtt.client import Client, MQTTMessage
 logger = logging.getLogger(__name__)
 
 
+last_recorded_color = None
+
+
 def light_data_callback(
     client: Client,
     userdata: Light,
     message: MQTTMessage,
     serial_connection: serial.Serial,
 ):
+    global last_recorded_color
 
     # Parse the incoming message
     try:
@@ -44,6 +48,15 @@ def light_data_callback(
 
         # Send the color to the light
         serial_connection.write(f"{color}\n".encode())
+        last_recorded_color = color
+        
+    # If we just get an ON signal, resend the last color
+    elif "state" in data and data["state"] == "ON":
+        if last_recorded_color is not None:
+            logger.info(f"[HA->Light]: Resending last color: {hex(last_recorded_color)}")
+            serial_connection.write(f"{last_recorded_color}\n".encode())
+        else:
+            logger.info(f"[HA->Light]: No last color to resend")
 
 
 def main() -> int:
