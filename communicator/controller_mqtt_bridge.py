@@ -31,9 +31,8 @@ def light_data_callback(
     # If the payload is trying to set the light state, handle it
     if "state" in data:
         if data["state"] == "ON":
-            pass
-            # logger.info("Turning on the light")
-            # serial_connection.write(f"{LAST_KNOWN_COLOR}\n".encode())
+            logger.info("[HA->Light]: Turning on the light (using last color)")
+            serial_connection.write(f"{LAST_KNOWN_COLOR}\n".encode())
         else:
             logger.info("[HA->Light]: Turning off the light")
             serial_connection.write(b"0\n")
