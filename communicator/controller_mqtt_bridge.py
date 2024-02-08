@@ -50,6 +50,7 @@ def light_data_callback(
 
         # Send the color to the light
         serial_connection.write(f"{color}\n".encode())
+        serial_connection.write(f"{color}\n".encode())
 
         # track the last known color
         LAST_KNOWN_COLOR = color
