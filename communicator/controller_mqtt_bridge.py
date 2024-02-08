@@ -32,7 +32,8 @@ def light_data_callback(
     if "state" in data:
         if data["state"] == "ON":
             logger.info("[HA->Light]: Turning on the light (using last color)")
-            serial_connection.write(f"{LAST_KNOWN_COLOR}\n".encode())
+            # serial_connection.write(f"{LAST_KNOWN_COLOR}\n".encode())
+            userdata.on()
         else:
             logger.info("[HA->Light]: Turning off the light")
             serial_connection.write(b"0\n")
@@ -49,7 +50,6 @@ def light_data_callback(
         logger.info(f"[HA->Light]: Packed color: {hex(color)}")
 
         # Send the color to the light
-        serial_connection.write(f"{color}\n".encode())
         serial_connection.write(f"{color}\n".encode())
 
         # track the last known color
