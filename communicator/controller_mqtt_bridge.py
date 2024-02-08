@@ -10,6 +10,7 @@ from paho.mqtt.client import Client, MQTTMessage
 
 logger = logging.getLogger(__name__)
 
+LAST_KNOWN_COLOR = 0
 
 def light_data_callback(client: Client, userdata: Light, message: MQTTMessage, serial_connection: serial.Serial):
     # Parse the incoming message
@@ -23,7 +24,7 @@ def light_data_callback(client: Client, userdata: Light, message: MQTTMessage, s
     if "state" in data:
         if data["state"] == "ON":
             logger.info("Turning on the light")
-            pass
+            serial_connection.write(f"{LAST_KNOWN_COLOR}\n".encode())
         else:
             logger.info("Turning off the light")
             serial_connection.write(b"0\n")       
@@ -42,6 +43,10 @@ def light_data_callback(client: Client, userdata: Light, message: MQTTMessage, s
         
         # Send the color to the light
         serial_connection.write(f"{color}\n".encode())
+        
+        # track the last known color
+        global LAST_KNOWN_COLOR
+        LAST_KNOWN_COLOR = color
 
 
 def main() -> int:
@@ -103,6 +108,7 @@ def main() -> int:
             shelf_light.on()
         else:
             color = int(line.strip())
+            logger.info(f"Got raw color from light: {color}")
             w = (color & 0b11000000) >> 6
             r = (color & 0b00110000) >> 4
             g = (color & 0b00001100) >> 2
