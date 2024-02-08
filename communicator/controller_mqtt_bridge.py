@@ -31,8 +31,9 @@ def light_data_callback(
     # If the payload is trying to set the light state, handle it
     if "state" in data:
         if data["state"] == "ON":
-            logger.info("Turning on the light")
-            serial_connection.write(f"{LAST_KNOWN_COLOR}\n".encode())
+            pass
+            # logger.info("Turning on the light")
+            # serial_connection.write(f"{LAST_KNOWN_COLOR}\n".encode())
         else:
             logger.info("Turning off the light")
             serial_connection.write(b"0\n")
@@ -47,7 +48,7 @@ def light_data_callback(
 
         # Pack into a uint32
         color = (w << 24) | (r << 16) | (g << 8) | b
-        logger.info(f"Packed color: {color}")
+        logger.info(f"Packed color: {hex(color)}")
 
         # Send the color to the light
         serial_connection.write(f"{color}\n".encode())
