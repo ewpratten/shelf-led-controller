@@ -25,7 +25,7 @@ def light_data_callback(
     try:
         data = json.loads(message.payload.decode())
     except json.JSONDecodeError as e:
-        logger.error(f"Failed to decode message: {e}")
+        logger.error(f"[HA->Light]: Failed to decode message: {e}")
         return
 
     # If the payload is trying to set the light state, handle it
@@ -35,12 +35,12 @@ def light_data_callback(
             # logger.info("Turning on the light")
             # serial_connection.write(f"{LAST_KNOWN_COLOR}\n".encode())
         else:
-            logger.info("Turning off the light")
+            logger.info("[HA->Light]: Turning off the light")
             serial_connection.write(b"0\n")
 
     # If we have a color payload, handle it
     if "color" in data:
-        logger.info(f"Setting color to {data['color']}")
+        logger.info(f"[HA->Light]: Setting color to {data['color']}")
         r = data["color"]["r"]
         g = data["color"]["g"]
         b = data["color"]["b"]
@@ -48,7 +48,7 @@ def light_data_callback(
 
         # Pack into a uint32
         color = (w << 24) | (r << 16) | (g << 8) | b
-        logger.info(f"Packed color: {hex(color)}")
+        logger.info(f"[HA->Light]: Packed color: {hex(color)}")
 
         # Send the color to the light
         serial_connection.write(f"{color}\n".encode())
@@ -109,19 +109,19 @@ def main() -> int:
 
         # Handle the command
         if line.strip() == b"OFF":
-            logger.info("Light is off")
+            logger.info("[Light->HA]: Light is off")
             shelf_light.off()
         elif line.strip() == b"ON":
-            logger.info("Light is on")
+            logger.info("[Light->HA]: Light is on")
             shelf_light.on()
         else:
             color = int(line.strip())
-            logger.info(f"Got raw color from light: {hex(color)}")
+            logger.info(f"[Light->HA]: Got raw color from light: {hex(color)}")
             w = (color >> 24) & 0b00000011
             r = (color >> 16) & 0b00000011
             g = (color >> 8) & 0b00000011
             b = color & 0b00000011
-            logger.info(f"Color: {hex(r)}, {hex(g)}, {hex(b)}, {hex(w)}")
+            logger.info(f"[Light->HA]: Color: {hex(r)}, {hex(g)}, {hex(b)}, {hex(w)}")
             shelf_light.color("rgbw", {"r": r, "g": g, "b": b, "w": w})
 
     return 0
